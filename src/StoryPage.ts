@@ -26,50 +26,6 @@ const info = <const>{
       default: null,
     },
     
-    instruction: {
-      type: ParameterType.STRING,
-      default: "Please read the following instructions carefully.",
-    },
-
-    previous_button: {
-      type: ParameterType.COMPLEX,
-      nested: {
-        button_text: {
-          type: ParameterType.STRING,
-          default: "Previous",
-        },
-        button_visible: {
-          type: ParameterType.BOOL,
-          default: true,
-        }
-      }
-    },
-    replay_button: {
-      type: ParameterType.COMPLEX,
-      nested: {
-        button_text: {
-          type: ParameterType.STRING,
-          default: "Replay",
-        },
-        button_visible: {
-          type: ParameterType.BOOL,
-          default: true,
-        }
-      }
-    },
-    next_button: {
-      type: ParameterType.COMPLEX,
-      nested: {
-        button_text: {
-          type: ParameterType.STRING,
-          default: "Next",
-        },
-        button_visible: {
-          type: ParameterType.BOOL,
-          default: true,
-        }
-      }
-    },
     /** An array of objects. Each object represents an image that appears on the screen. Each object contains a id, src, clickable, x_pos, y_pos, width, height, time_onset, and time_offset parameter that will be applied to the question. */
     images: {
       type: ParameterType.COMPLEX,
@@ -359,50 +315,7 @@ const info = <const>{
     // helper: jspsych.pluginAPI.setTimeout(() => {function that we wanna run is the one that displays the image}, time) to time the presentation of images and audio based on the time_onset parameter for each stimulus in the trial.
     // helper: jspsych.pluginAPI.clearAllTimeouts() to clear any timeouts that have been set when the trial ends. 
 
-
-    
-    
-    // we want to set up the previous and replay button here
-    // and the next button 
-    // and we can set it so that they can show it or not (by changing the parameters)
-    
-    // Show instructions if there is one
-    if (trial.instruction !== null) {
-      display_element.insertAdjacentHTML("beforeend", trial.instruction);
-    }
-    
-    // Display control buttons
-    const buttonGroupElement = document.createElement("div");
-    buttonGroupElement.id = "jspsych-storybook-btngroup";
-    // Make the button group a flex container
-    buttonGroupElement.classList.add("jspsych-btn-group-flex");
-    
-    if(trial.previous_button.button_visible) {
-      buttonGroupElement.insertAdjacentHTML("beforeend", `<button class="jspsych-btn">${trial.previous_button.button_text}</button>`);
-      const buttonElement = buttonGroupElement.lastChild as HTMLElement;
-      buttonElement.id = `jspsych-storybook-btn-${trial.previous_button.button_text}`;
-      buttonElement.addEventListener("click", () => {
-        console.log("Previous button clicked");
-      });
-    }
-    if(trial.replay_button.button_visible) {
-      buttonGroupElement.insertAdjacentHTML("beforeend", `<button class="jspsych-btn">${trial.replay_button.button_text}</button>`);
-      const buttonElement = buttonGroupElement.lastChild as HTMLElement;
-      buttonElement.id = `jspsych-storybook-btn-${trial.replay_button.button_text}`;
-      buttonElement.addEventListener("click", () => {
-        console.log("Replay button clicked");
-      });
-    }
-    if(trial.next_button.button_visible) {
-      buttonGroupElement.insertAdjacentHTML("beforeend", `<button class="jspsych-btn">${trial.next_button.button_text}</button>`);
-      const buttonElement = buttonGroupElement.lastChild as HTMLElement;
-      buttonElement.id = `jspsych-storybook-btn-${trial.next_button.button_text}`;
-      buttonElement.addEventListener("click", () => {
-        console.log("Next button clicked");
-      });
-    }
-    display_element.appendChild(buttonGroupElement);
-    
+  
     // start each clip at its scheduled onset (or immediately if time_onset is 0)
     clips.forEach((clip, i) => {
       const player = this.audioPlayers[i];
@@ -482,6 +395,10 @@ const info = <const>{
     // move on to the next trial
     this.trial_complete(trial_data);
   }
+  /** Stops playback and ends this page early — for use when an embedding plugin needs to swap pages before this one finishes naturally. */
+  public cancel = () => {
+    this.end_trial();
+  };
 }
 
 export default StorybookPlugin;
