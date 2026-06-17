@@ -12,9 +12,41 @@
   <body></body>
   <script>
     const jsPsych = initJsPsych();
-
+    
     const trial = {
-      type: jsPsychStorycollection
+      type: jsPsychStorycollection,
+      previous_button: {
+        button_text: "Previous",
+        button_visible: true
+      },
+      next_button: {
+        button_text: "Next",
+        button_visible: true
+      },
+      replay_button: {
+        button_text: "Replay",
+        button_visible: true
+      }, 
+      pages: [
+        {
+          background_image: "img/background.jpeg",
+          images: [], 
+          highlight: [],
+          animations: [],
+          audio: [
+            { src: "sound/ready.mp3", time_onset: 0 },
+          ],
+        }, 
+        {
+          background_image: "img/background.jpeg",
+          images: [], 
+          highlight: [],
+          animations: [],
+          audio: [
+             { src: "sound/bunny2.mp3", time_onset: 2610 },
+          ],
+        }
+      ]
     };
 
     jsPsych.run([trial])
