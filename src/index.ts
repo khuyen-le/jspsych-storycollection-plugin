@@ -135,7 +135,9 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
     display_element.appendChild(buttonGroupElement);
     
     on_load();
-    this.goToPage(0);
+
+    // start at page 0
+    this.goToPage(0)
     
     return new Promise<void>(() => {}); // flag only — finishTrial happens in goToPage
   }
@@ -146,14 +148,18 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
     this.currentStorybook?.cancel(); // stop whatever page is currently playing
     
     this.currentIndex = index;
-    const storybook = new jsPsychStorybook(this.jsPsych);
+    const storybook = new jsPsychStorybook(this.jsPsych); 
     this.currentStorybook = storybook;
     
+    // wait for a story page to finish
     const data = await storybook.trial(this.storybookSlot, this.params.pages[index], () => {});
-    
+
     // ignore results from a page that got cancelled before it could finish naturally
+    // so that storybook isn't overwritten by a cancelled page
     if (storybook !== this.currentStorybook) return;
     this.pageData[index] = data;
+
+    this.goToPage(index + 1);
     
     if (index === this.params.pages.length - 1) {
       this.jsPsych.finishTrial({ pages: this.pageData });
