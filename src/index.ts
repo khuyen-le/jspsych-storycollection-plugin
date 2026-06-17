@@ -132,6 +132,12 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
       buttonGroupElement.insertAdjacentHTML("beforeend", `<button class="jspsych-btn">${trial.next_button.button_text}</button>`);
       (buttonGroupElement.lastChild as HTMLElement).addEventListener("click", () => this.goToPage(this.currentIndex + 1));
     }
+    // loop through the pages and check for audio, if there is no audio, then throw a warning on the console that there should be a next button
+    for (let i = 0; i < this.params.pages.length; i++) {
+      if (!this.params.pages[i].audio || this.params.pages[i].audio.length === 0) {
+        console.warn(`Page ${i} has no audio. Consider adding a next button.`);
+      }
+    }
     display_element.appendChild(buttonGroupElement);
     
     on_load();
