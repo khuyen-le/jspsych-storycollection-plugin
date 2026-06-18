@@ -50,6 +50,8 @@ class StorybookProgressExtension implements JsPsychExtension {
     star_size: number;
   } | null = null;
 
+  private pagesCompleted = 0;
+
   constructor(private jsPsych: JsPsych) {}
 
   initialize(): Promise<void> {
@@ -71,6 +73,7 @@ class StorybookProgressExtension implements JsPsychExtension {
     this.config = show_progress_bar
       ? { total_pages, celebration_sound, celebration_message, star_symbol, star_color, star_size }
       : null;
+    this.pagesCompleted = pages_completed;
 
     const container = this.jsPsych.getDisplayContainerElement();
     container.querySelector('#storybook-progress-bar')?.remove();
@@ -93,12 +96,28 @@ class StorybookProgressExtension implements JsPsychExtension {
    * progress more than once per trial. No-op if show_progress_bar wasn't set.
    */
   setPagesCompleted(pagesCompleted: number): void {
+    this.pagesCompleted = pagesCompleted;
+    this.rerender();
+  }
+
+  /**
+   * Overrides total_pages after on_start, e.g. so a host plugin can force it to
+   * match its own authoritative page count instead of trusting a hand-typed
+   * trial param that can drift out of sync with it.
+   */
+  setTotalPages(totalPages: number): void {
+    if (!this.config) return;
+    this.config = { ...this.config, total_pages: totalPages };
+    this.rerender();
+  }
+
+  private rerender(): void {
     if (!this.config) return;
     const { total_pages, celebration_sound, ...appearance } = this.config;
     const container = this.jsPsych.getDisplayContainerElement();
     container.querySelector('#storybook-progress-bar')?.remove();
     container.querySelector('#storybook-celebration-banner')?.remove();
-    this.renderProgressBar(container, total_pages, pagesCompleted, celebration_sound, appearance);
+    this.renderProgressBar(container, total_pages, this.pagesCompleted, celebration_sound, appearance);
   }
 
   on_load(): void {}
