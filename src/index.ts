@@ -190,7 +190,12 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
     // so that storybook isn't overwritten by a cancelled page
     if (storybook !== this.currentStorybook) return;
     this.pageData[index] = data;
-    
+
+    // extension on_start only fires once per trial, but this trial can contain
+    // many pages, so tell the progress extension directly when one completes
+    (this.jsPsych.extensions["storybook-progress"] as { setPagesCompleted?: (n: number) => void })
+      ?.setPagesCompleted?.(index + 1);
+
     if (index === this.params.pages.length - 1) {
       this.jsPsych.finishTrial({ pages: this.pageData });
     }
