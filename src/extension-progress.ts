@@ -37,6 +37,21 @@ class StorybookProgressExtension implements JsPsychExtension {
     data: {},
   };
 
+  // appearance config from the trial's on_start params, kept around so a host
+  // plugin can update pages_completed mid-trial via setPagesCompleted() without
+  // having to repeat it — on_start only fires once per trial, but a single trial
+  // can contain many pages (e.g. plugin-storycollection)
+  private config: {
+    total_pages: number;
+    celebration_sound: string | null;
+    celebration_message: string;
+    star_symbol: string;
+    star_color: string;
+    star_size: number;
+  } | null = null;
+
+  private pagesCompleted = 0;
+
   constructor(private jsPsych: JsPsych) {}
 
   initialize(): Promise<void> {
@@ -55,6 +70,11 @@ class StorybookProgressExtension implements JsPsychExtension {
       star_size = 38,
     } = params;
 
+    this.config = show_progress_bar
+      ? { total_pages, celebration_sound, celebration_message, star_symbol, star_color, star_size }
+      : null;
+    this.pagesCompleted = pages_completed;
+
     const container = this.jsPsych.getDisplayContainerElement();
     container.querySelector('#storybook-progress-bar')?.remove();
     container.querySelector('#storybook-celebration-banner')?.remove();
@@ -67,6 +87,37 @@ class StorybookProgressExtension implements JsPsychExtension {
         star_size,
       });
     }
+  }
+
+  /**
+   * Re-renders the bar with an updated pages_completed count, reusing the
+   * appearance set in on_start. For host plugins whose own internal navigation
+   * (e.g. paging through several pages inside one jsPsych trial) needs to update
+   * progress more than once per trial. No-op if show_progress_bar wasn't set.
+   */
+  setPagesCompleted(pagesCompleted: number): void {
+    this.pagesCompleted = pagesCompleted;
+    this.rerender();
+  }
+
+  /**
+   * Overrides total_pages after on_start, e.g. so a host plugin can force it to
+   * match its own authoritative page count instead of trusting a hand-typed
+   * trial param that can drift out of sync with it.
+   */
+  setTotalPages(totalPages: number): void {
+    if (!this.config) return;
+    this.config = { ...this.config, total_pages: totalPages };
+    this.rerender();
+  }
+
+  private rerender(): void {
+    if (!this.config) return;
+    const { total_pages, celebration_sound, ...appearance } = this.config;
+    const container = this.jsPsych.getDisplayContainerElement();
+    container.querySelector('#storybook-progress-bar')?.remove();
+    container.querySelector('#storybook-celebration-banner')?.remove();
+    this.renderProgressBar(container, total_pages, this.pagesCompleted, celebration_sound, appearance);
   }
 
   on_load(): void {}

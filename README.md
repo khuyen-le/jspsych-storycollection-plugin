@@ -65,6 +65,19 @@ const trial = {
 | `star_color`            | string          | `'#FFD700'`           | CSS color for a filled star and the celebration text. |
 | `star_size`             | int             | `38`                  | Font size of each star, in pixels. Spacing and outline thickness scale with it. |
 
+`on_start` only fires once per trial, so if a single trial contains several
+pages internally (like `plugin-storycollection`'s own `pages` array), the bar
+won't update as the user navigates between them on its own. For that case,
+the host plugin can call the extension's `setPagesCompleted(n)` method
+directly whenever a page completes, reusing whatever appearance was set in
+`on_start`:
+
+```js
+jsPsych.extensions["storybook-progress"]?.setPagesCompleted(2);
+```
+
+`plugin-storycollection` already does this in `goToPage()`.
+
 Confetti requires [canvas-confetti](https://www.npmjs.com/package/canvas-confetti)
 to be loaded separately (e.g. via CDN `<script>` tag); the extension degrades
 gracefully — no confetti, no error — if it isn't present.
