@@ -7,12 +7,20 @@ const info = <const>{
   name: "plugin-storycollection",
   version: version,
   parameters: {
+    
     /** An array of story pages to display. */
     pages: {
       type: ParameterType.COMPLEX,
       array: true,
       nested: jsPsychStorybook.info.parameters,
     },
+
+    /** If true, the navigation buttons (previous/replay/next) remain enabled while a story page is playing, so the participant can respond before the page finishes. If false, the buttons are disabled until the current page finishes playing. */
+    response_allowed_while_playing: {
+      type: ParameterType.BOOL,
+      default: true,
+    },
+
     /** The instructions to display to the participant. */
     instruction: {
       type: ParameterType.STRING,
@@ -102,6 +110,9 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
   private currentStorybook: jsPsychStorybook | null = null;
   private pageData: any[] = [];
   private finish!: (data: any) => void;
+  private previousButtonEl: HTMLButtonElement | null = null;
+  private replayButtonEl: HTMLButtonElement | null = null;
+  private nextButtonEl: HTMLButtonElement | null = null;
   
   constructor(private jsPsych: JsPsych) {}
   
@@ -122,15 +133,18 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
     
     if (trial.previous_button.button_visible) {
       buttonGroupElement.insertAdjacentHTML("beforeend", `<button class="jspsych-btn">${trial.previous_button.button_text}</button>`);
-      (buttonGroupElement.lastChild as HTMLElement).addEventListener("click", () => this.goToPage(this.currentIndex - 1));
+      this.previousButtonEl = buttonGroupElement.lastChild as HTMLButtonElement;
+      this.previousButtonEl.addEventListener("click", () => this.goToPage(this.currentIndex - 1));
     }
     if (trial.replay_button.button_visible) {
       buttonGroupElement.insertAdjacentHTML("beforeend", `<button class="jspsych-btn">${trial.replay_button.button_text}</button>`);
-      (buttonGroupElement.lastChild as HTMLElement).addEventListener("click", () => this.goToPage(this.currentIndex));
+      this.replayButtonEl = buttonGroupElement.lastChild as HTMLButtonElement;
+      this.replayButtonEl.addEventListener("click", () => this.goToPage(this.currentIndex));
     }
     if (trial.next_button.button_visible) {
       buttonGroupElement.insertAdjacentHTML("beforeend", `<button class="jspsych-btn">${trial.next_button.button_text}</button>`);
-      (buttonGroupElement.lastChild as HTMLElement).addEventListener("click", () => this.goToPage(this.currentIndex + 1));
+      this.nextButtonEl = buttonGroupElement.lastChild as HTMLButtonElement;
+      this.nextButtonEl.addEventListener("click", () => this.goToPage(this.currentIndex + 1));
     }
     // loop through the pages and check for audio, if there is no audio, then throw a warning on the console that there should be a next button
     for (let i = 0; i < this.params.pages.length; i++) {
@@ -147,6 +161,13 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
     
     return new Promise<void>(() => {}); // flag only — finishTrial happens in goToPage
   }
+
+  /** Enables or disables the previous/replay/next navigation buttons. Used to block responses while a page is playing when `response_allowed_while_playing` is false. */
+  private setNavigationButtonsDisabled(disabled: boolean) {
+    if (this.previousButtonEl) this.previousButtonEl.disabled = disabled;
+    if (this.replayButtonEl) this.replayButtonEl.disabled = disabled;
+    if (this.nextButtonEl) this.nextButtonEl.disabled = disabled;
+  }
   
   private goToPage = async (index: number) => {
     if (index < 0 || index >= this.params.pages.length) return;
@@ -156,6 +177,11 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
     this.currentIndex = index;
     const storybook = new jsPsychStorybook(this.jsPsych); 
     this.currentStorybook = storybook;
+
+    // if responses aren't allowed while a page is playing, disable navigation until it finishes
+    if (!this.params.response_allowed_while_playing) {
+      this.setNavigationButtonsDisabled(true);
+    }
     
     // wait for a story page to finish
     const data = await storybook.trial(this.storybookSlot, this.params.pages[index], () => {});
