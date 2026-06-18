@@ -73,6 +73,58 @@ Respects the OS-level `prefers-reduced-motion: reduce` setting: skips the star
 pop-in, the celebration banner's pop-in, and all confetti, while still landing
 on the same end state (filled stars, banner visible).
 
+### `jspsych-extension-animations`
+
+Animates an image within a page, identified by `image_id` (matches the
+`id` of an entry in that page's `images` array) — e.g. wiggling `arlo-hi`
+once it appears, instead of it just popping in.
+
+Unlike `extension-progress` (which attaches to the trial via the normal
+`extensions` array), each `plugin-storycollection` trial only contains one
+real jsPsych trial internally — its `pages` are run via direct method calls
+as the user navigates, not as separate jsPsych trials, so jsPsych never calls
+`on_start`/`on_load` for them. `plugin-storycollection` instead reads
+`animations` (and `render_mode`) directly off each page object and drives
+the extension itself when that page loads. So unlike the progress extension,
+`animations` goes directly on the page, not inside an `extensions` block:
+
+```html
+<script src="dist/index.browser.min.js"></script>
+<script src="dist/extension-animations.browser.min.js"></script>
+```
+
+```js
+const jsPsych = initJsPsych({
+  extensions: [{ type: jsPsychExtensionAnimations }],
+});
+
+const trial = {
+  type: jsPsychStorycollection,
+  pages: [
+    {
+      images: [{ id: "arlo-hi", src: "arlo-hi.png", time_onset: 5000 }],
+      animations: [
+        { image_id: "arlo-hi", type: "wiggle", duration: 1000, time_onset: 5200 },
+      ],
+      // ...
+    },
+  ],
+};
+```
+
+| Animation param      | Type   | Default | Description |
+| --------------------- | ------ | ------- | ----------- |
+| `image_id`             | string | —       | Must match the `id` of an image in the page's `images` array. |
+| `type`                  | string | —       | One of the 7 built-ins (`wiggle`, `loom`, `translate`, `fadeIn`, `fadeOut`, `bounce`, `shake`), or any custom name paired with `keyframes`. |
+| `time_onset`            | int    | `0`     | Milliseconds to wait (from when the page itself starts) before the animation starts. |
+| `duration`              | int    | `1000`  | How long the animation runs, in milliseconds. |
+| `x`, `y`                | int    | `0`     | Pixel offset for the `translate` animation only. |
+| `keyframes`             | object | —       | Custom (non-built-in) animation definition; see `plugin-storybook`'s README for the format. |
+| `holds_final_state`     | boolean| `false` | For a custom animation: hold the final computed value once finished, instead of reverting to identity. |
+
+Respects the OS-level `prefers-reduced-motion: reduce` setting: animations
+jump straight to their end state with no tween.
+
 ## Documentation
 
 See [documentation](/plugin-storycollection/README.md)

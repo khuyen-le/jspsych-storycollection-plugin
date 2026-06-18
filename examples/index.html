@@ -7,6 +7,7 @@
 <script src="https://unpkg.com/plugin-storycollection"></script> -->
     <script src="../dist/index.browser.min.js"></script>
     <script src="../dist/extension-progress.browser.min.js"></script>
+    <script src="../dist/extension-animations.browser.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/jspsych/css/jspsych.css" />
   </head>
 
@@ -14,21 +15,7 @@
   <script>
     /* initialize jsPsych */
     const jsPsych = initJsPsych({
-      show_progress_bar: true,
-      extensions: [{ 
-        type: jsPsychExtensionProgress, 
-        params: {
-          show_progress_bar: true,
-          total_pages: 1,
-          pages_completed: 0,
-          celebration_sound: null,
-          celebration_message: '⭐  Great job!  ⭐',
-          star_symbol: '★',
-          star_color: '#FFD700',
-          star_size: 38,
-          // Add any parameters for the progress extension here
-        }
-       }],
+      extensions: [{ type: jsPsychExtensionProgress }, { type: jsPsychExtensionAnimations }],
       on_finish: function() {
         jsPsych.data.displayData();
       }
@@ -36,11 +23,11 @@
     
     const trial = {
       type: jsPsychStorycollection,
-      extensions: [{ 
-        type: jsPsychExtensionProgress, 
+      extensions: [{
+        type: jsPsychExtensionProgress,
         params: {
           show_progress_bar: true,
-          total_pages: 1,
+          total_pages: 3,
           pages_completed: 0,
           celebration_sound: null,
           celebration_message: '⭐  Great job!  ⭐',
@@ -80,13 +67,14 @@
           background_image: "img/background.jpeg",
           images: [{ id: "arlo", src: "img/arlo.png", x_pos: 20, y_pos: 20, width: 20, time_onset: 0, duration: 5000 },
                   { id: "arlo-hi", src: "img/arlo-hi.png", x_pos: 20, y_pos: 20, width: 20, time_onset: 5000, duration: 2000 }],
-          width: 70, 
+          width: 70,
+          animations: [{ image_id: "arlo-hi", type: "wiggle", duration: 1000, time_onset: 5200 }],
           audio: [
             { src: "sound/ready.mp3", time_onset: 0 },
             { src: "sound/chimes.mp3", time_onset: 2500 },
             { src: "sound/arlo-hi.mp3", time_onset: 5000 },
           ],
-        }, 
+        },
         {
           background_image: "img/background.jpeg",
           images: [{ id: "arlo", src: "img/arlo.png", x_pos: 20, y_pos: 20, width: 20, time_onset: 0, duration: 5000 },
