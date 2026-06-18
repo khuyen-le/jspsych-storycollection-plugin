@@ -15,6 +15,20 @@
     /* initialize jsPsych */
     const jsPsych = initJsPsych({
       show_progress_bar: true,
+      extensions: [{ 
+        type: jsPsychExtensionProgress, 
+        params: {
+          show_progress_bar: true,
+          total_pages: 1,
+          pages_completed: 0,
+          celebration_sound: null,
+          celebration_message: '⭐  Great job!  ⭐',
+          star_symbol: '★',
+          star_color: '#FFD700',
+          star_size: 38,
+          // Add any parameters for the progress extension here
+        }
+       }],
       on_finish: function() {
         jsPsych.data.displayData();
       }

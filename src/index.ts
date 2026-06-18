@@ -30,6 +30,7 @@ const info = <const>{
     /** The button to go to the previous story page. */
     previous_button: {
       type: ParameterType.COMPLEX,
+      default: { button_visible: true, button_text: "Previous" },
       nested: {
         /** The text to display on the button. */
         button_text: {
@@ -46,6 +47,7 @@ const info = <const>{
     /** The button to replay the current story page. */
     replay_button: {
       type: ParameterType.COMPLEX,
+      default: { button_visible: true, button_text: "Replay" },
       nested: {
         /** The text to display on the button. */
         button_text: {
@@ -62,6 +64,7 @@ const info = <const>{
     /** The button to go to the next story page. */
     next_button: {
       type: ParameterType.COMPLEX,
+      default: { button_visible: true, button_text: "Next" },
       nested: {
         /** The text to display on the button. */
         button_text: {
