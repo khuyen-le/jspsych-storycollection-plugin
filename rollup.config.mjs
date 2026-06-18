@@ -58,4 +58,5 @@ const makeExtensionBrowserConfig = (input, name, destination) => {
 export default [
   ...mainConfig,
   ...makeExtensionBrowserConfig("src/extension-progress.ts", "jsPsychExtensionProgress", "extension-progress"),
+  ...makeExtensionBrowserConfig("src/extension-animations.ts", "jsPsychExtensionAnimations", "extension-animations"),
 ];

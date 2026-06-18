@@ -186,8 +186,19 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
       this.setNavigationButtonsDisabled(true);
     }
     
+    // extensions only get on_start/on_load automatically for real jsPsych trials, but
+    // each page here is run via a direct method call rather than the Timeline/Trial
+    // machinery, so drive the animations extension's lifecycle manually per page
+    const page = this.params.pages[index];
+    const animationsExt = this.jsPsych.extensions["storybook-animations"] as
+      | { on_start?: (params: any) => void; on_load?: (params: any) => void }
+      | undefined;
+    animationsExt?.on_start?.({ animations: page.animations, render_mode: page.render_mode });
+
     // wait for a story page to finish
-    const data = await storybook.trial(this.storybookSlot, this.params.pages[index], () => {});
+    const data = await storybook.trial(this.storybookSlot, page, () =>
+      animationsExt?.on_load?.({ animations: page.animations, render_mode: page.render_mode })
+    );
 
     // ignore results from a page that got cancelled before it could finish naturally
     // so that storybook isn't overwritten by a cancelled page
