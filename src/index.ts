@@ -164,12 +164,11 @@ class StorycollectionPlugin implements JsPsychPlugin<Info> {
     // so that storybook isn't overwritten by a cancelled page
     if (storybook !== this.currentStorybook) return;
     this.pageData[index] = data;
-
-    this.goToPage(index + 1);
     
     if (index === this.params.pages.length - 1) {
       this.jsPsych.finishTrial({ pages: this.pageData });
     }
+    this.goToPage(index + 1);
   };
 }
 
