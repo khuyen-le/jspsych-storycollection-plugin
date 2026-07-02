@@ -1,5 +1,5 @@
 import { JsPsych, JsPsychPlugin, ParameterType, TrialType } from "jspsych";
-import jsPsychStorybook from "./StoryPage"; // might have to change this once storybook is published to npm
+import jsPsychStorybook from "jspsych-storybook"; // might have to change this once storybook is published to npm
 
 import { version } from "../package.json";
 
